@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use proc_macro::TokenStream;
 use types_reader::attribute_params::AttributeParams;
 
@@ -16,17 +18,20 @@ pub fn generate(
     let grpc_service_name = attributes.get_named_param("grpc_service_name")?;
     let grpc_service_name: String = grpc_service_name.get_value(None)?;
 
+    let grpc_service_name_token =
+        proc_macro2::TokenStream::from_str(grpc_service_name.as_str()).unwrap();
+
     Ok(quote::quote! {
 
         pub const SERVICE_NAME: &str = #grpc_service_name;
-        type TGrpcService = #grpc_service_name<InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
+        type TGrpcService = #grpc_service_name_token<InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
 
         struct MyGrpcServiceFactory;
 
         #[async_trait::async_trait]
         impl GrpcServiceFactory<TGrpcService> for MyGrpcServiceFactory {
         fn create_service(&self, channel: Channel, ctx: &MyTelemetryContext) -> TGrpcService {
-            #grpc_service_name::with_interceptor(
+            #grpc_service_name_token::with_interceptor(
               channel,
               my_grpc_extensions::GrpcClientInterceptor::new(ctx.clone()),
             )
