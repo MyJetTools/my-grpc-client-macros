@@ -52,9 +52,9 @@ pub fn generate(
       #ast
 
       impl #struct_name{
-        pub async fn new(get_grpc_address: Arc<dyn GrpcClientSettings + Send + Sync + 'static>,) -> Self {
+        pub async fn new(get_grpc_address: std::sync::Arc<dyn GrpcClientSettings + Send + Sync + 'static>,) -> Self {
             Self {
-                grpc_channel: GrpcChannel::new(
+                channel: GrpcChannel::new(
                     get_grpc_address,
                     Arc::new(MyGrpcServiceFactory),
                     Duration::from_secs(#timeout_sec),
