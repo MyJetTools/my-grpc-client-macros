@@ -22,7 +22,8 @@ pub fn generate(
         proc_macro2::TokenStream::from_str(grpc_service_name.as_str()).unwrap();
 
     let timeout_sec = attributes.get_named_param("timeout_sec")?;
-    let timeout_sec: usize = timeout_sec.get_value(None)?;
+    let timeout_sec: String = timeout_sec.get_value(None)?;
+    let timeout_sec = proc_macro2::TokenStream::from_str(timeout_sec.as_str()).unwrap();
 
     Ok(quote::quote! {
 
@@ -52,11 +53,11 @@ pub fn generate(
       #ast
 
       impl #struct_name{
-        pub async fn new(get_grpc_address: std::sync::Arc<dyn GrpcClientSettings + Send + Sync + 'static>,) -> Self {
+        pub async fn new(get_grpc_address: std::sync::Arc<dyn my_grpc_extensions::GrpcClientSettings + Send + Sync + 'static>,) -> Self {
             Self {
                 channel: GrpcChannel::new(
                     get_grpc_address,
-                    Arc::new(MyGrpcServiceFactory),
+                    std::sync::Arc::new(MyGrpcServiceFactory),
                     Duration::from_secs(#timeout_sec),
                 ),
             }
