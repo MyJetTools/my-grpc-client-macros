@@ -25,6 +25,11 @@ pub fn generate(
     let timeout_sec: String = timeout_sec.get_value(None)?;
     let timeout_sec = proc_macro2::TokenStream::from_str(timeout_sec.as_str()).unwrap();
 
+    let proto_file = attributes.get_named_param("proto_file")?;
+    let proto_file: String = proto_file.get_value(None)?;
+
+    let proto_file = super::proto_file_reader::read_proto_file(proto_file);
+
     Ok(quote::quote! {
 
         pub const SERVICE_NAME: &str = #grpc_service_name;
