@@ -56,7 +56,7 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
                     }
                 }
                 CurrentToken::Service => {
-                    service_name = Some(token.to_string());
+                    service_name = Some(format!("{}Client", token));
                     current_token = CurrentToken::None;
                 }
             }
