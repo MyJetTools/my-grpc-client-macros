@@ -1,4 +1,7 @@
-use std::io::{BufRead, BufReader};
+use std::{
+    io::{BufRead, BufReader},
+    str::FromStr,
+};
 
 pub enum ParamType {
     Single(String),
@@ -12,8 +15,19 @@ pub struct ProtoRpc {
 }
 
 pub struct ProtoFile {
-    service_name: String,
-    rpc: Vec<ProtoRpc>,
+    pub service_name: String,
+    pub rpc: Vec<ProtoRpc>,
+}
+
+impl ProtoFile {
+    pub fn get_service_name_as_token(&self) -> proc_macro2::TokenStream {
+        proc_macro2::TokenStream::from_str(&self.service_name).unwrap()
+    }
+}
+
+pub enum CurrentToken {
+    None,
+    Service,
 }
 
 pub fn read_proto_file(file_name: String) -> ProtoFile {
@@ -27,13 +41,34 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
 
     let reader = BufReader::new(file);
 
-    // Step 2: loop over lines and print them.
+    let mut service_name = None;
+
+    let mut current_token = CurrentToken::None;
+
     for line in reader.lines() {
-        println!("LINE: {}", line.unwrap());
+        let line = line.unwrap();
+
+        for token in line.split_whitespace() {
+            match current_token {
+                CurrentToken::None => {
+                    if token == "service" {
+                        current_token = CurrentToken::Service;
+                    }
+                }
+                CurrentToken::Service => {
+                    service_name = Some(token.to_string());
+                    current_token = CurrentToken::None;
+                }
+            }
+        }
+    }
+
+    if service_name.is_none() {
+        panic!("Can not find service name in proto file: {}", file_name);
     }
 
     ProtoFile {
-        service_name: String::from(""),
+        service_name: service_name.unwrap().to_string(),
         rpc: Vec::new(),
     }
 }

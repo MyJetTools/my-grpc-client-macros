@@ -15,12 +15,6 @@ pub fn generate(
 
     let attributes = AttributeParams::from_token_string(attr_input)?;
 
-    let grpc_service_name = attributes.get_named_param("grpc_service_name")?;
-    let grpc_service_name: String = grpc_service_name.get_value(None)?;
-
-    let grpc_service_name_token =
-        proc_macro2::TokenStream::from_str(grpc_service_name.as_str()).unwrap();
-
     let timeout_sec = attributes.get_named_param("timeout_sec")?;
     let timeout_sec: String = timeout_sec.get_value(None)?;
     let timeout_sec = proc_macro2::TokenStream::from_str(timeout_sec.as_str()).unwrap();
@@ -29,6 +23,9 @@ pub fn generate(
     let proto_file: String = proto_file.get_value(None)?;
 
     let proto_file = super::proto_file_reader::read_proto_file(proto_file);
+
+    let grpc_service_name = &proto_file.service_name;
+    let grpc_service_name_token = proto_file.get_service_name_as_token();
 
     Ok(quote::quote! {
 
