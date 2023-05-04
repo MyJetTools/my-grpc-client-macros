@@ -108,8 +108,8 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
                         if name != "Ping" {
                             rpc.push(ProtoRpc {
                                 name: name.to_string(),
-                                input_param: input_param_name.to_string(),
-                                output_param: out_param_name.to_string(),
+                                input_param: extract_param(input_param_name.as_str()),
+                                output_param: extract_param(out_param_name.as_str()),
                             });
                         }
                         current_token = CurrentToken::None;
