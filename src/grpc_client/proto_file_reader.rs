@@ -99,11 +99,16 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
                 }
                 CurrentToken::RpcExpectingOutputParameter => {
                     let out_param_name = extract_param(token);
-                    rpc.push(ProtoRpc {
-                        name: rpc_name.as_ref().unwrap().to_string(),
-                        input_param: input_param_name.as_ref().unwrap().to_string(),
-                        output_param: out_param_name,
-                    });
+
+                    let name = rpc_name.as_ref().unwrap();
+
+                    if name != "Ping" {
+                        rpc.push(ProtoRpc {
+                            name: name.to_string(),
+                            input_param: input_param_name.as_ref().unwrap().to_string(),
+                            output_param: out_param_name,
+                        });
+                    }
                     current_token = CurrentToken::None;
                 }
                 CurrentToken::Service => {
