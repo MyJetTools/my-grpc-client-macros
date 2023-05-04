@@ -29,7 +29,7 @@ pub fn generate(
         struct MyGrpcServiceFactory;
 
         #[async_trait::async_trait]
-        impl GrpcServiceFactory<TGrpcService> for MyGrpcServiceFactory {
+        impl my_grpc_extensions::GrpcServiceFactory<TGrpcService> for MyGrpcServiceFactory {
         fn create_service(&self, channel: Channel, ctx: &MyTelemetryContext) -> TGrpcService {
             #grpc_service_name_token::with_interceptor(
               channel,
