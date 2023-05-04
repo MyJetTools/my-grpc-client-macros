@@ -141,10 +141,8 @@ fn extract_input_param_from_rpc_name<'s>(token: &'s str) -> (&'s str, Option<&'s
     }
 
     let index = index.unwrap();
-    match token.find(")") {
-        Some(end) => (&token[..index], (&token[index + 1..end]).into()),
-        None => (&token[..index], (&token[index + 1..]).into()),
-    }
+
+    (&token[..index], (&token[index..]).into())
 }
 
 fn extract_param(token: &str) -> String {
