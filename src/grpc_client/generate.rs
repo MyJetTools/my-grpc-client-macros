@@ -24,6 +24,8 @@ pub fn generate(
 
     let proto_file = super::proto_file_reader::read_proto_file(proto_file);
 
+    println!("{:?}", proto_file);
+
     let grpc_service_name = &proto_file.service_name;
     let grpc_service_name_token = proto_file.get_service_name_as_token();
 
