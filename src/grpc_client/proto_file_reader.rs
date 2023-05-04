@@ -1,3 +1,5 @@
+use std::io::{BufRead, BufReader};
+
 pub enum ParamType {
     Single(String),
     Vector(String),
@@ -19,6 +21,15 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
 
     if let Err(err) = file {
         panic!("Can not open file: {}. Error: {:?}", file_name, err);
+    }
+
+    let file = file.unwrap();
+
+    let reader = BufReader::new(file);
+
+    // Step 2: loop over lines and print them.
+    for line in reader.lines() {
+        println!("LINE: {}", line.unwrap());
     }
 
     ProtoFile {
