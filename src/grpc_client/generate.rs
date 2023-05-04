@@ -57,7 +57,7 @@ pub fn generate(
                 grpc_channel: GrpcChannel::new(
                     get_grpc_address,
                     Arc::new(MyGrpcServiceFactory),
-                    Duration::from_secs(10),
+                    Duration::from_secs(#timeout_sec),
                 ),
             }
         }
