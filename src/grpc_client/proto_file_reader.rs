@@ -31,7 +31,6 @@ pub enum CurrentToken {
     Service,
     Rpc,
     RpcExpectingInputParameter,
-    RpcExpectingReturnsToken,
     RpcExpectingOutputParameter,
 }
 
@@ -50,9 +49,11 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
 
     let mut current_token = CurrentToken::None;
 
-    let mut rpc_name: Option<String> = None;
+    let mut rpc_name = None;
 
-    let mut input_param_name = None;
+    let mut input_param_name = String::new();
+
+    let mut out_param_name = String::new();
 
     let mut rpc = Vec::new();
 
@@ -73,43 +74,46 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
                 CurrentToken::Rpc => {
                     let (rpc_name_value, input_param_value) =
                         extract_input_param_from_rpc_name(token);
-                    rpc_name = Some(rpc_name_value);
+                    rpc_name = Some(rpc_name_value.to_string());
 
-                    input_param_name = input_param_value;
+                    input_param_name.clear();
+                    out_param_name.clear();
 
-                    if input_param_name.is_some() {
-                        current_token = CurrentToken::RpcExpectingReturnsToken;
-                    } else {
-                        current_token = CurrentToken::RpcExpectingInputParameter;
+                    if let Some(input_param) = input_param_value {
+                        input_param_name.push_str(input_param);
                     }
+
+                    current_token = CurrentToken::RpcExpectingInputParameter;
                 }
-                CurrentToken::RpcExpectingReturnsToken => {
+                CurrentToken::RpcExpectingInputParameter => {
                     if token == "returns" {
                         current_token = CurrentToken::RpcExpectingOutputParameter;
                     } else {
-                        panic!(
-                            "Expecting 'returns' token after rpc name: {}",
-                            rpc_name.unwrap()
-                        );
+                        input_param_name.push(' ');
+                        input_param_name.push_str(token);
                     }
                 }
-                CurrentToken::RpcExpectingInputParameter => {
-                    input_param_name = Some(extract_param(token));
-                    current_token = CurrentToken::RpcExpectingReturnsToken;
-                }
+
                 CurrentToken::RpcExpectingOutputParameter => {
-                    let out_param_name = extract_param(token);
-
-                    let name = rpc_name.as_ref().unwrap();
-
-                    if name != "Ping" {
-                        rpc.push(ProtoRpc {
-                            name: name.to_string(),
-                            input_param: input_param_name.as_ref().unwrap().to_string(),
-                            output_param: out_param_name,
-                        });
+                    let the_end = token.ends_with(";");
+                    if the_end {
+                        out_param_name.push_str(&token[..token.len() - 1]);
+                    } else {
+                        out_param_name.push_str(&token);
                     }
-                    current_token = CurrentToken::None;
+
+                    if the_end {
+                        let name = rpc_name.as_ref().unwrap();
+
+                        if name != "Ping" {
+                            rpc.push(ProtoRpc {
+                                name: name.to_string(),
+                                input_param: input_param_name.to_string(),
+                                output_param: out_param_name.to_string(),
+                            });
+                        }
+                        current_token = CurrentToken::None;
+                    }
                 }
                 CurrentToken::Service => {
                     service_name = Some(format!("{}Client", token));
@@ -129,23 +133,17 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
     }
 }
 
-fn extract_input_param_from_rpc_name(token: &str) -> (String, Option<String>) {
+fn extract_input_param_from_rpc_name<'s>(token: &'s str) -> (&'s str, Option<&'s str>) {
     let index = token.find("(");
 
     if index.is_none() {
-        return (token.to_string(), None);
+        return (token, None);
     }
 
     let index = index.unwrap();
     match token.find(")") {
-        Some(end) => (
-            token[..index].to_string(),
-            token[index + 1..end].to_string().into(),
-        ),
-        None => (
-            token[..index].to_string(),
-            token[index + 1..].to_string().into(),
-        ),
+        Some(end) => (&token[..index], (&token[index + 1..end]).into()),
+        None => (&token[..index], (&token[index + 1..]).into()),
     }
 }
 
