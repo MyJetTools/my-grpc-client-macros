@@ -21,6 +21,9 @@ pub fn generate(
     let grpc_service_name_token =
         proc_macro2::TokenStream::from_str(grpc_service_name.as_str()).unwrap();
 
+    let timeout_sec = attributes.get_named_param("timeout_sec")?;
+    let timeout_sec: usize = timeout_sec.get_value(None)?;
+
     Ok(quote::quote! {
 
         pub const SERVICE_NAME: &str = #grpc_service_name;
@@ -47,6 +50,18 @@ pub fn generate(
       }
 
       #ast
+
+      impl #struct_name{
+        pub fn new(get_grpc_address: Arc<dyn GrpcClientSettings + Send + Sync + 'static>) -> Self {
+            Self {
+                grpc_channel: GrpcChannel::new(
+                    get_grpc_address,
+                    GRPC_SERVICE_NAME,
+                    Duration::from_secs(#timeout_sec),
+                ),
+            }
+        }
+      }
     }
     .into())
 }
