@@ -85,7 +85,7 @@ impl ProtoRpc {
     }
 
     pub fn get_output_param(&self) -> Option<ParamType> {
-        ParamType::parse(&self.input_param)
+        ParamType::parse(&self.output_param)
     }
 }
 
