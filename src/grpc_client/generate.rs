@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use proc_macro::TokenStream;
+use proc_macro2::Ident;
 use types_reader::attribute_params::AttributeParams;
 
 use super::proto_file_reader::ProtoFile;
@@ -29,7 +30,7 @@ pub fn generate(
     let grpc_service_name = &proto_file.service_name;
     let grpc_service_name_token = proto_file.get_service_name_as_token();
 
-    let interfaces = generate_interfaces_implementations(&proto_file);
+    let interfaces = generate_interfaces_implementations(struct_name, &proto_file);
 
     Ok(quote::quote! {
 
@@ -75,7 +76,7 @@ pub fn generate(
     .into())
 }
 
-fn generate_interfaces_implementations(proto_file: &ProtoFile) -> Vec<proc_macro2::TokenStream> {
+fn generate_interfaces_implementations(struct_name: &Ident, proto_file: &ProtoFile) -> Vec<proc_macro2::TokenStream> {
     let mut result = Vec::new();
 
 
@@ -101,7 +102,7 @@ fn generate_interfaces_implementations(proto_file: &ProtoFile) -> Vec<proc_macro
                             TGrpcService,
                             #input_param_name_token,
                             #output_param_name_token,
-                        > for KeyValueGrpcClient
+                        > for #struct_name
                     {
                         async fn execute(
                             &self,
@@ -135,7 +136,7 @@ fn generate_interfaces_implementations(proto_file: &ProtoFile) -> Vec<proc_macro
                             TGrpcService,
                             #input_param_name_token,
                             #output_param_type_token,
-                        > for KeyValueGrpcClient
+                        > for #struct_name
                     {
                         async fn execute(
                             &self,
@@ -170,7 +171,7 @@ fn generate_interfaces_implementations(proto_file: &ProtoFile) -> Vec<proc_macro
                             TGrpcService,
                             #input_param_type_token,
                             #output_param_name_token,
-                        > for KeyValueGrpcClient
+                        > for #struct_name
                     {
                         async fn execute(
                             &self,
@@ -202,34 +203,32 @@ fn get_interface_name(input_param: &super::proto_file_reader::ParamType<'_>, out
     if input_param.is_stream(){
         if output_param.is_stream(){
 
-            quote::quote!(RequestWithInputAsStreamWithResponseAsStreamGrpcExecutor)
+            quote::quote!(my_grpc_extensions::RequestWithInputAsStreamWithResponseAsStreamGrpcExecutor)
 
         }else{
-            quote::quote!(RequestWithInputAsStreamGrpcExecutor)
+            quote::quote!(my_grpc_extensions::RequestWithInputAsStreamGrpcExecutor)
         }
     }else{
         if output_param.is_stream(){
-            quote::quote!(RequestWithResponseAsStreamGrpcExecutor)
+            quote::quote!(my_grpc_extensions::RequestWithResponseAsStreamGrpcExecutor)
         }else{
-            quote::quote!(RequestResponseGrpcExecutor)
+            quote::quote!(my_grpc_extensions::RequestResponseGrpcExecutor)
         }
     }
 }
 
 fn get_interface_name_with_input_param_only(input_param: &super::proto_file_reader::ParamType<'_>)->proc_macro2::TokenStream{
     if input_param.is_stream(){
-        quote::quote!(RequestWithInputAsStreamGrpcExecutor)
+        quote::quote!(my_grpc_extensions::RequestWithInputAsStreamGrpcExecutor)
     }else{
-        quote::quote!(RequestResponseGrpcExecutor)
+        quote::quote!(my_grpc_extensions::RequestResponseGrpcExecutor)
     }
 }
 
-
-
 fn get_interface_name_with_output_param_only(output_param: &super::proto_file_reader::ParamType<'_>)->proc_macro2::TokenStream{
         if output_param.is_stream(){
-            quote::quote!(RequestWithResponseAsStreamGrpcExecutor)
+            quote::quote!(my_grpc_extensions::RequestWithResponseAsStreamGrpcExecutor)
         }else{
-            quote::quote!(RequestResponseGrpcExecutor)
+            quote::quote!(my_grpc_extensions::RequestResponseGrpcExecutor)
         }
 }
