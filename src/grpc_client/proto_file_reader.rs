@@ -58,6 +58,16 @@ impl<'s> ParamType<'s> {
         }
     }
 
+    pub fn get_input_param_invoke_token(&self) -> proc_macro2::TokenStream {
+        match self {
+            Self::Single(name) => proc_macro2::TokenStream::from_str(name).unwrap(),
+            Self::Stream(name) => {
+                let param = proc_macro2::TokenStream::from_str(name).unwrap();
+                quote::quote!(futures::stream::iter(#param))
+            }
+        }
+    }
+
     pub fn get_output_param_type_token(&self) -> proc_macro2::TokenStream {
         match self {
             Self::Single(name) => proc_macro2::TokenStream::from_str(name).unwrap(),

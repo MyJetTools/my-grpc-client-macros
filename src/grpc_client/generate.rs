@@ -95,6 +95,8 @@ fn generate_interfaces_implementations(struct_name: &Ident, proto_file: &ProtoFi
                 let interface_name = get_interface_name(&input_param_type, &output_param_type);
 
                 let fn_name = rpc.get_fn_name_as_token();
+
+                let input_param_invoke = input_param_type.get_input_param_invoke_token();
                 
 
                 let quote = quote::quote!{
@@ -111,7 +113,7 @@ fn generate_interfaces_implementations(struct_name: &Ident, proto_file: &ProtoFi
                             mut service: TGrpcService,
                             input_data: #input_param_type_token,
                         ) -> Result<#output_param_type_token, tonic::Status> {
-                            let result = service.#fn_name(futures::stream::iter(input_data)).await?;
+                            let result = service.#fn_name(#input_param_invoke).await?;
                             Ok(result.into_inner())
                         }
                     }
@@ -131,6 +133,8 @@ fn generate_interfaces_implementations(struct_name: &Ident, proto_file: &ProtoFi
 
                 let fn_name = rpc.get_fn_name_as_token();
 
+                let input_param_invoke = input_param_type.get_input_param_invoke_token();
+
                 let quote = quote::quote!{
                     #[async_trait::async_trait]
                     impl
@@ -145,7 +149,7 @@ fn generate_interfaces_implementations(struct_name: &Ident, proto_file: &ProtoFi
                             mut service: TGrpcService,
                             input_data: #input_param_type_token,
                         ) -> Result<#output_param_type_token, tonic::Status> {
-                            let result = service.#fn_name(futures::stream::iter(input_data)).await?;
+                            let result = service.#fn_name(#input_param_invoke).await?;
                             Ok(result.into_inner())
                         }
                     }
@@ -181,7 +185,7 @@ fn generate_interfaces_implementations(struct_name: &Ident, proto_file: &ProtoFi
                             mut service: TGrpcService,
                             input_data: #input_param_type_token,
                         ) -> Result<#output_param_type_token, tonic::Status> {
-                            let result = service.#fn_name(futures::stream::iter(input_data)).await?;
+                            let result = service.#fn_name(()).await?;
                             Ok(result.into_inner())
                         }
                     }
