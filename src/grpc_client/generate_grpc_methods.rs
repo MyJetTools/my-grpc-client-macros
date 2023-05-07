@@ -25,15 +25,13 @@ pub fn generate_grpc_methods(proto_file: &ProtoFile) -> Vec<proc_macro2::TokenSt
                 input_data: #input_data_type,
                 ctx: &MyTelemetryContext,
             ) -> Result<#output_data_type, my_grpc_extensions::GrpcReadError> {
-                let channel = self.grpc_channel.get_channel(ctx).await.unwrap();
+                let channel = self.channel.get_channel(ctx).await.unwrap();
 
                 channel
                     .#request_fn_name(input_data)
                     .with_retries(3)
                     .#response_fn_name(self)
-                    .await?
-                    .as_vec()
-                    .await?
+
             }
         };
 
@@ -62,13 +60,15 @@ fn get_response_fn_name(input_param: Option<&super::ParamType<'_>>) -> proc_macr
     match input_param {
         Some(input_param) => {
             if input_param.is_stream() {
-                quote::quote! {get_streamed_response}
+                quote::quote! {get_streamed_response.await?
+                .as_vec()
+                .await?}
             } else {
-                quote::quote! {get_response}
+                quote::quote! {get_response.await?}
             }
         }
         None => {
-            quote::quote! {get_response}
+            quote::quote! {get_response.await?}
         }
     }
 }
