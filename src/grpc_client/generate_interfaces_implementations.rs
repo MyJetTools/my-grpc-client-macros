@@ -126,8 +126,8 @@ pub fn generate_interfaces_implementations(
 }
 
 fn get_interface_name(
-    input_param: &super::proto_file_reader::ParamType<'_>,
-    output_param: &super::proto_file_reader::ParamType<'_>,
+    input_param: &super::ParamType<'_>,
+    output_param: &super::ParamType<'_>,
 ) -> proc_macro2::TokenStream {
     if input_param.is_stream() {
         if output_param.is_stream() {
@@ -147,7 +147,7 @@ fn get_interface_name(
 }
 
 fn get_interface_name_with_input_param_only(
-    input_param: &super::proto_file_reader::ParamType<'_>,
+    input_param: &super::ParamType<'_>,
 ) -> proc_macro2::TokenStream {
     if input_param.is_stream() {
         quote::quote!(my_grpc_extensions::RequestWithInputAsStreamGrpcExecutor)
@@ -157,7 +157,7 @@ fn get_interface_name_with_input_param_only(
 }
 
 fn get_interface_name_with_output_param_only(
-    output_param: &super::proto_file_reader::ParamType<'_>,
+    output_param: &super::ParamType<'_>,
 ) -> proc_macro2::TokenStream {
     if output_param.is_stream() {
         quote::quote!(my_grpc_extensions::RequestWithResponseAsStreamGrpcExecutor)

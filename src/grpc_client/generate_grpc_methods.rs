@@ -1,4 +1,6 @@
-use super::proto_file_reader::ProtoFile;
+use std::str::FromStr;
+
+use super::{proto_file_reader::ProtoFile, ParamType};
 
 pub fn generate_grpc_methods(proto_file: &ProtoFile) -> Vec<proc_macro2::TokenStream> {
     let mut result = Vec::new();
@@ -10,7 +12,9 @@ pub fn generate_grpc_methods(proto_file: &ProtoFile) -> Vec<proc_macro2::TokenSt
 
         let output_param = rpc.get_output_param();
 
-        let input_data_type = get_request_fn_name(input_param.as_ref());
+        let input_data_type = get_func_data_type(input_param.as_ref());
+
+        let output_data_type = get_func_data_type(output_param.as_ref());
 
         let request_fn_name = get_request_fn_name(input_param.as_ref());
         let response_fn_name = get_response_fn_name(output_param.as_ref());
@@ -20,7 +24,7 @@ pub fn generate_grpc_methods(proto_file: &ProtoFile) -> Vec<proc_macro2::TokenSt
                 &self,
                 input_data: #input_data_type,
                 ctx: &MyTelemetryContext,
-            ) -> Result<Vec<GetKeyValueGrpcResponseModel>, GrpcReadError> {
+            ) -> Result<#output_data_type, my_grpc_extensions::GrpcReadError> {
                 let channel = self.grpc_channel.get_channel(ctx).await.unwrap();
 
                 channel
@@ -39,9 +43,7 @@ pub fn generate_grpc_methods(proto_file: &ProtoFile) -> Vec<proc_macro2::TokenSt
     result
 }
 
-fn get_request_fn_name(
-    input_param: Option<&super::proto_file_reader::ParamType<'_>>,
-) -> proc_macro2::TokenStream {
+fn get_request_fn_name(input_param: Option<&super::ParamType<'_>>) -> proc_macro2::TokenStream {
     match input_param {
         Some(input_param) => {
             if input_param.is_stream() {
@@ -56,9 +58,7 @@ fn get_request_fn_name(
     }
 }
 
-fn get_response_fn_name(
-    input_param: Option<&super::proto_file_reader::ParamType<'_>>,
-) -> proc_macro2::TokenStream {
+fn get_response_fn_name(input_param: Option<&super::ParamType<'_>>) -> proc_macro2::TokenStream {
     match input_param {
         Some(input_param) => {
             if input_param.is_stream() {
@@ -69,6 +69,21 @@ fn get_response_fn_name(
         }
         None => {
             quote::quote! {get_response}
+        }
+    }
+}
+
+fn get_func_data_type(data_type: Option<&super::ParamType<'_>>) -> proc_macro2::TokenStream {
+    match data_type {
+        Some(input_param) => match input_param {
+            ParamType::Single(name) => proc_macro2::TokenStream::from_str(name).unwrap(),
+            ParamType::Stream(name) => {
+                let param = proc_macro2::TokenStream::from_str(name).unwrap();
+                quote::quote!(Vec<#param>)
+            }
+        },
+        None => {
+            quote::quote! {()}
         }
     }
 }
