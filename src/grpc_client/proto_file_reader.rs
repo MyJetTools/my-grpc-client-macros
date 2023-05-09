@@ -158,8 +158,11 @@ fn extract_input_param_from_rpc_name<'s>(token: &'s str) -> (&'s str, Option<&'s
 }
 
 fn extract_param(token: &str) -> String {
-    let end = token.find(")").unwrap();
-    token[1..end].to_string()
+    let result = {
+        let end = token.find(")").unwrap();
+        &token[1..end]
+    };
+    result.split('.').last().unwrap().to_string()
 }
 
 fn into_snake_case(src: &str) -> String {
