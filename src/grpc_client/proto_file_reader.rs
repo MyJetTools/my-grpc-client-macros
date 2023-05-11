@@ -182,9 +182,8 @@ fn extract_param(token: &str) -> String {
             } else {
                 return last.to_string();
             }
-        } else {
-            return prev.to_string();
         }
+        return prev.to_string();
     }
 
     panic!("Somehow has empty param")
