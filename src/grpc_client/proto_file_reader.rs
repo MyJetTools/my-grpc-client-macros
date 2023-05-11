@@ -162,7 +162,32 @@ fn extract_param(token: &str) -> String {
         let end = token.find(")").unwrap();
         &token[1..end]
     };
-    result.split('.').last().unwrap().to_string()
+
+    let mut prev = None;
+    let mut last = None;
+
+    for itm in result.split('.') {
+        if prev.is_none() {
+            prev = Some(itm)
+        } else {
+            prev = last;
+            last = Some(itm)
+        }
+    }
+
+    if let Some(prev) = prev {
+        if let Some(last) = last {
+            if prev == "protobuf" && last == "Empty" {
+                return "()".to_string();
+            } else {
+                return last.to_string();
+            }
+        } else {
+            return prev.to_string();
+        }
+    }
+
+    panic!("Somehow has empty param")
 }
 
 fn into_snake_case(src: &str) -> String {
