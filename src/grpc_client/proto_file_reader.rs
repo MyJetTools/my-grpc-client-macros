@@ -163,34 +163,24 @@ fn extract_param(token: &str) -> String {
         &token[1..end]
     };
 
-    let mut prev = None;
-    let mut last = None;
+    let items: Vec<&str> = result.split('.').collect();
 
-    for itm in result.split('.') {
-        if prev.is_none() {
-            prev = Some(itm)
-        } else {
-            prev = last;
-            last = Some(itm)
-        }
+    if items.len() == 0 {
+        panic!("Somehow has empty param");
     }
 
-    if let Some(prev) = prev {
-        if let Some(last) = last {
-            if prev == "protobuf" && last == "Empty" {
-                return "()".to_string();
-            } else {
-                return last.to_string();
-            }
-        }
-        return prev.to_string();
+    if items.len() == 1 {
+        return items[0].to_string();
     }
 
-    if let Some(last) = last {
+    let prev = items[items.len() - 2];
+    let last = items[items.len() - 1];
+
+    if prev == "protobuf" && last == "Empty" {
+        return "()".to_string();
+    } else {
         return last.to_string();
     }
-
-    panic!("Somehow has empty param")
 }
 
 fn into_snake_case(src: &str) -> String {
