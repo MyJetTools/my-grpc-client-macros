@@ -186,6 +186,10 @@ fn extract_param(token: &str) -> String {
         return prev.to_string();
     }
 
+    if let Some(last) = last {
+        return last.to_string();
+    }
+
     panic!("Somehow has empty param")
 }
 
