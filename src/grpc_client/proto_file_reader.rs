@@ -26,28 +26,6 @@ impl ProtoRpc {
     }
 }
 
-fn extract_param(token: &str) -> String {
-    println!("Extracting param from: [{}]", token);
-    let items: Vec<&str> = token.split('.').collect();
-
-    if items.len() == 0 {
-        panic!("Somehow has empty param");
-    }
-
-    if items.len() == 1 {
-        return items[0].to_string();
-    }
-
-    let prev = items[items.len() - 2];
-    let last = items[items.len() - 1];
-
-    if prev == "protobuf" && last == "Empty" {
-        return "()".to_string();
-    } else {
-        return last.to_string();
-    }
-}
-
 #[derive(Debug)]
 pub struct ProtoServiceDescription {
     pub service_name: String,
@@ -143,8 +121,8 @@ impl ProtoServiceDescription {
                             if name != "Ping" {
                                 rpc.push(ProtoRpc {
                                     name: name.to_string(),
-                                    input_param: extract_param(input_param_name.as_str()),
-                                    output_param: extract_param(out_param_name.as_str()),
+                                    input_param: input_param_name.to_string(),
+                                    output_param: out_param_name.to_string(),
                                 });
                             }
                             current_token = CurrentToken::None;
