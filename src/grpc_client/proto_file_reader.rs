@@ -121,6 +121,10 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
                     }
 
                     if token == ";" {
+                        if rpc_name.is_none() {
+                            panic!("Somehow rpc_name is null");
+                        }
+
                         let name = rpc_name.as_ref().unwrap();
 
                         if name != "Ping" {
@@ -157,12 +161,7 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
 }
 
 fn extract_param(token: &str) -> String {
-    let result = {
-        let end = token.find(")").unwrap();
-        &token[1..end]
-    };
-
-    let items: Vec<&str> = result.split('.').collect();
+    let items: Vec<&str> = token.split('.').collect();
 
     if items.len() == 0 {
         panic!("Somehow has empty param");
