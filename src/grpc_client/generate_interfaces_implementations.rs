@@ -11,6 +11,13 @@ pub fn generate_interfaces_implementations(
     let mut result = Vec::new();
 
     for rpc in &proto_file.rpc {
+        println!(
+            "RPC {} has input_param {:?} and output_param {:?}",
+            rpc.name,
+            rpc.get_input_param(),
+            rpc.get_output_param()
+        );
+
         if let Some(input_param_type) = &rpc.get_input_param() {
             if let Some(output_param_type) = &rpc.get_output_param() {
                 let input_param_type_token = get_name_fn_param_type_token(&input_param_type);
