@@ -161,6 +161,7 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
 }
 
 fn extract_param(token: &str) -> String {
+    println!("Extracting param from: {}", token);
     let items: Vec<&str> = token.split('.').collect();
 
     if items.len() == 0 {
