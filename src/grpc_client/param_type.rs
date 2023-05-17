@@ -24,10 +24,14 @@ impl<'s> ParamType<'s> {
 
         let name = name?;
 
+        if name == "google.protobuf.Empty" {
+            return Self::Single("()").into();
+        }
+
         if is_vec {
-            Self::Stream(name).into()
+            Self::Stream(name.split('.').last().unwrap()).into()
         } else {
-            Self::Single(name).into()
+            Self::Single(name.split('.').last().unwrap()).into()
         }
     }
 
