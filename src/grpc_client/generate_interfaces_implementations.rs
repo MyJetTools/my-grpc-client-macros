@@ -1,6 +1,8 @@
+use std::str::FromStr;
+
 use proc_macro2::Ident;
 
-use super::proto_file_reader::ProtoFile;
+use super::{proto_file_reader::ProtoFile, ParamType};
 
 pub fn generate_interfaces_implementations(
     struct_name: &Ident,
@@ -11,7 +13,7 @@ pub fn generate_interfaces_implementations(
     for rpc in &proto_file.rpc {
         if let Some(input_param_type) = &rpc.get_input_param() {
             if let Some(output_param_type) = &rpc.get_output_param() {
-                let input_param_type_token = input_param_type.get_input_param_type_token();
+                let input_param_type_token = get_name_fn_param_type_token(&input_param_type);
 
                 let output_param_type_token = output_param_type.get_output_param_type_token();
 
@@ -38,7 +40,7 @@ pub fn generate_interfaces_implementations(
                             mut service: TGrpcService,
                             input_data: #input_param_type_token,
                         ) -> Result<#output_param_type_token, tonic::Status> {
-                            let result = service.#fn_name(#input_param_invoke).await?;
+                            let result = service.#fn_name(#input_param_invoke.into()).await?;
                             Ok(result.into_inner())
                         }
                     }
@@ -46,7 +48,7 @@ pub fn generate_interfaces_implementations(
 
                 result.push(quote);
             } else {
-                let input_param_type_token = input_param_type.get_input_param_type_token();
+                let input_param_type_token = get_name_fn_param_type_token(&input_param_type);
 
                 let output_param_type_token = quote::quote! {()};
 
@@ -72,7 +74,7 @@ pub fn generate_interfaces_implementations(
                             mut service: TGrpcService,
                             input_data: #input_param_type_token,
                         ) -> Result<#output_param_type_token, tonic::Status> {
-                            let result = service.#fn_name(#input_param_invoke).await?;
+                            let result = service.#fn_name(#input_param_invoke.into()).await?;
                             Ok(result.into_inner())
                         }
                     }
@@ -163,5 +165,15 @@ fn get_interface_name_with_output_param_only(
         quote::quote!(my_grpc_extensions::RequestWithResponseAsStreamGrpcExecutor)
     } else {
         quote::quote!(my_grpc_extensions::RequestResponseGrpcExecutor)
+    }
+}
+
+fn get_name_fn_param_type_token(src: &ParamType<'_>) -> proc_macro2::TokenStream {
+    match src {
+        ParamType::Single(name) => proc_macro2::TokenStream::from_str(name).unwrap(),
+        ParamType::Stream(name) => {
+            let name = proc_macro2::TokenStream::from_str(name).unwrap();
+            quote::quote!(Vec<#name>)
+        }
     }
 }
