@@ -23,7 +23,7 @@ impl<'s> ProtoTokensReader<'s> {
                 continue;
             }
 
-            if b == b'(' || b == b')' || b == b';' {
+            if b == b'(' || b == b')' || b == b';' || b == b'{' || b == b'}' {
                 if let Some(start_pos) = start_pos {
                     return Some(std::str::from_utf8(&self.content[start_pos..self.pos]).unwrap());
                 }
@@ -64,23 +64,44 @@ mod tests {
 
     #[test]
     fn test_basic_parse() {
-        let src = "rpc Get(stream keyvalue.GetKeyValueGrpcRequestModel) returns (stream keyvalue.GetKeyValueGrpcResponseModel);";
+        let src = "service KeyValueFlowsGrpcService { rpc Get(stream keyvalue.GetKeyValueGrpcRequestModel) returns (stream keyvalue.GetKeyValueGrpcResponseModel);}";
 
         let result = ProtoTokensReader::new(src).collect::<Vec<_>>();
 
-        assert_eq!(result.len(), 12);
+        assert_eq!(result.len(), 16);
 
-        assert_eq!(result[0], "rpc");
-        assert_eq!(result[1], "Get");
-        assert_eq!(result[2], "(");
-        assert_eq!(result[3], "stream");
-        assert_eq!(result[4], "keyvalue.GetKeyValueGrpcRequestModel");
-        assert_eq!(result[5], ")");
-        assert_eq!(result[6], "returns");
-        assert_eq!(result[7], "(");
-        assert_eq!(result[8], "stream");
-        assert_eq!(result[9], "keyvalue.GetKeyValueGrpcResponseModel");
-        assert_eq!(result[10], ")");
-        assert_eq!(result[11], ";");
+        let mut pos = 0;
+        assert_eq!(result[pos], "service");
+
+        pos += 1;
+        assert_eq!(result[pos], "KeyValueFlowsGrpcService");
+        pos += 1;
+        assert_eq!(result[pos], "{");
+        pos += 1;
+        assert_eq!(result[pos], "rpc");
+        pos += 1;
+        assert_eq!(result[pos], "Get");
+        pos += 1;
+        assert_eq!(result[pos], "(");
+        pos += 1;
+        assert_eq!(result[pos], "stream");
+        pos += 1;
+        assert_eq!(result[pos], "keyvalue.GetKeyValueGrpcRequestModel");
+        pos += 1;
+        assert_eq!(result[pos], ")");
+        pos += 1;
+        assert_eq!(result[pos], "returns");
+        pos += 1;
+        assert_eq!(result[pos], "(");
+        pos += 1;
+        assert_eq!(result[pos], "stream");
+        pos += 1;
+        assert_eq!(result[pos], "keyvalue.GetKeyValueGrpcResponseModel");
+        pos += 1;
+        assert_eq!(result[pos], ")");
+        pos += 1;
+        assert_eq!(result[pos], ";");
+        pos += 1;
+        assert_eq!(result[pos], "}");
     }
 }
