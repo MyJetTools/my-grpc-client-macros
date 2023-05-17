@@ -3,7 +3,7 @@ use std::{
     str::FromStr,
 };
 
-use super::ParamType;
+use super::{proto_tokens_reader::ProtoTokensReader, ParamType};
 
 #[derive(Debug)]
 pub struct ProtoRpc {
@@ -72,7 +72,7 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
     for line in reader.lines() {
         let line = line.unwrap();
 
-        for token in line.split_whitespace() {
+        for token in ProtoTokensReader::new(line.as_str()) {
             match current_token {
                 CurrentToken::None => {
                     if token == "service" {

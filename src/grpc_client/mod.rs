@@ -2,6 +2,7 @@ mod generate;
 mod generate_grpc_methods;
 mod param_type;
 mod proto_file_reader;
+mod proto_tokens_reader;
 pub use generate::*;
 mod generate_interfaces_implementations;
 use generate_grpc_methods::*;
