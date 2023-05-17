@@ -47,7 +47,7 @@ pub fn generate_interfaces_implementations(
                             mut service: TGrpcService,
                             input_data: #input_param_type_token,
                         ) -> Result<#output_param_type_token, tonic::Status> {
-                            let result = service.#fn_name(#input_param_invoke.into()).await?;
+                            let result = service.#fn_name(#input_param_invoke).await?;
                             Ok(result.into_inner())
                         }
                     }
@@ -81,7 +81,7 @@ pub fn generate_interfaces_implementations(
                             mut service: TGrpcService,
                             input_data: #input_param_type_token,
                         ) -> Result<#output_param_type_token, tonic::Status> {
-                            let result = service.#fn_name(#input_param_invoke.into()).await?;
+                            let result = service.#fn_name(#input_param_invoke).await?;
                             Ok(result.into_inner())
                         }
                     }
