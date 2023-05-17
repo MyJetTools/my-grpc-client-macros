@@ -83,7 +83,7 @@ fn get_func_data_type(data_type: Option<&super::ParamType<'_>>) -> proc_macro2::
             ParamType::Single(name) => proc_macro2::TokenStream::from_str(name).unwrap(),
             ParamType::Stream(name) => {
                 let param = proc_macro2::TokenStream::from_str(name).unwrap();
-                quote::quote!(Vec<#param>)
+                quote::quote!(Option<Vec<#param>>)
             }
         },
         None => {
