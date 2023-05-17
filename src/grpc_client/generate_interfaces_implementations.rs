@@ -2,11 +2,11 @@ use std::str::FromStr;
 
 use proc_macro2::Ident;
 
-use super::{proto_file_reader::ProtoFile, ParamType};
+use super::{proto_file_reader::ProtoServiceDescription, ParamType};
 
 pub fn generate_interfaces_implementations(
     struct_name: &Ident,
-    proto_file: &ProtoFile,
+    proto_file: &ProtoServiceDescription,
 ) -> Vec<proc_macro2::TokenStream> {
     let mut result = Vec::new();
 

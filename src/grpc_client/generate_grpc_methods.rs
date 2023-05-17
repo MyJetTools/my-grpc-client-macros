@@ -1,8 +1,10 @@
 use std::str::FromStr;
 
-use super::{proto_file_reader::ProtoFile, ParamType};
+use super::{proto_file_reader::ProtoServiceDescription, ParamType};
 
-pub fn generate_grpc_methods(proto_file: &ProtoFile) -> Vec<proc_macro2::TokenStream> {
+pub fn generate_grpc_methods(
+    proto_file: &ProtoServiceDescription,
+) -> Vec<proc_macro2::TokenStream> {
     let mut result = Vec::new();
 
     for rpc in &proto_file.rpc {

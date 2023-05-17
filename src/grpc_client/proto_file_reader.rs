@@ -26,142 +26,8 @@ impl ProtoRpc {
     }
 }
 
-#[derive(Debug)]
-pub struct ProtoFile {
-    pub service_name: String,
-    pub rpc: Vec<ProtoRpc>,
-}
-
-impl ProtoFile {
-    pub fn get_service_name_as_token(&self) -> proc_macro2::TokenStream {
-        proc_macro2::TokenStream::from_str(&self.service_name).unwrap()
-    }
-}
-
-pub enum CurrentToken {
-    None,
-    Service,
-    Rpc,
-    RpcExpectingInputParameter,
-    RpcExpectingOutputParameter,
-}
-
-pub fn read_proto_file(file_name: String) -> ProtoFile {
-    let file = std::fs::File::open(file_name.as_str());
-
-    if let Err(err) = file {
-        panic!("Can not open file: {}. Error: {:?}", file_name, err);
-    }
-
-    let file = file.unwrap();
-
-    let reader = BufReader::new(file);
-
-    let mut service_name = None;
-
-    let mut current_token = CurrentToken::None;
-
-    let mut rpc_name = None;
-
-    let mut input_param_name = String::new();
-
-    let mut out_param_name = String::new();
-
-    let mut rpc = Vec::new();
-
-    for line in reader.lines() {
-        let line = line.unwrap();
-
-        for token in ProtoTokensReader::new(line.as_str()) {
-            match current_token {
-                CurrentToken::None => {
-                    if token == "service" {
-                        current_token = CurrentToken::Service;
-                    }
-
-                    if token == "rpc" {
-                        current_token = CurrentToken::Rpc;
-                    }
-                }
-                CurrentToken::Rpc => {
-                    rpc_name = Some(token.to_string());
-
-                    input_param_name.clear();
-                    out_param_name.clear();
-
-                    current_token = CurrentToken::RpcExpectingInputParameter;
-                }
-                CurrentToken::RpcExpectingInputParameter => {
-                    if token == "(" {
-                        continue;
-                    }
-
-                    if token == ")" {
-                        current_token = CurrentToken::RpcExpectingOutputParameter;
-                        continue;
-                    }
-
-                    if input_param_name.len() > 0 {
-                        input_param_name.push(' ');
-                    }
-                    input_param_name.push_str(token);
-                }
-
-                CurrentToken::RpcExpectingOutputParameter => {
-                    if token == "returns" {
-                        continue;
-                    }
-
-                    if token == "(" {
-                        continue;
-                    }
-
-                    if token == ")" {
-                        continue;
-                    }
-
-                    if token == ";" {
-                        if rpc_name.is_none() {
-                            panic!("Somehow rpc_name is null");
-                        }
-
-                        let name = rpc_name.as_ref().unwrap();
-
-                        if name != "Ping" {
-                            rpc.push(ProtoRpc {
-                                name: name.to_string(),
-                                input_param: extract_param(input_param_name.as_str()),
-                                output_param: extract_param(out_param_name.as_str()),
-                            });
-                        }
-                        current_token = CurrentToken::None;
-                    }
-
-                    if out_param_name.len() > 0 {
-                        out_param_name.push(' ');
-                    }
-                    out_param_name.push_str(token);
-                }
-                CurrentToken::Service => {
-                    service_name = Some(format!("{}Client", token));
-                    current_token = CurrentToken::None;
-                }
-            }
-        }
-    }
-
-    if service_name.is_none() {
-        panic!("Can not find service name in proto file: {}", file_name);
-    }
-
-    ProtoFile {
-        service_name: service_name.unwrap().to_string(),
-        rpc,
-    }
-}
-
 fn extract_param(token: &str) -> String {
-    println!("Extracting param from: '{}'", token);
+    println!("Extracting param from: [{}]", token);
     let items: Vec<&str> = token.split('.').collect();
 
     if items.len() == 0 {
@@ -180,6 +46,140 @@ fn extract_param(token: &str) -> String {
     } else {
         return last.to_string();
     }
+}
+
+#[derive(Debug)]
+pub struct ProtoServiceDescription {
+    pub service_name: String,
+    pub rpc: Vec<ProtoRpc>,
+}
+
+impl ProtoServiceDescription {
+    pub fn get_service_name_as_token(&self) -> proc_macro2::TokenStream {
+        proc_macro2::TokenStream::from_str(&self.service_name).unwrap()
+    }
+
+    pub fn read_proto_file(file_name: String) -> Self {
+        let file = std::fs::File::open(file_name.as_str());
+
+        if let Err(err) = file {
+            panic!("Can not open file: {}. Error: {:?}", file_name, err);
+        }
+
+        let file = file.unwrap();
+
+        let reader = BufReader::new(file);
+
+        let mut service_name = None;
+
+        let mut current_token = CurrentToken::None;
+
+        let mut rpc_name = None;
+
+        let mut input_param_name = String::new();
+
+        let mut out_param_name = String::new();
+
+        let mut rpc = Vec::new();
+
+        for line in reader.lines() {
+            let line = line.unwrap();
+
+            for token in ProtoTokensReader::new(line.as_str()) {
+                match current_token {
+                    CurrentToken::None => {
+                        if token == "service" {
+                            current_token = CurrentToken::Service;
+                        }
+
+                        if token == "rpc" {
+                            current_token = CurrentToken::Rpc;
+                        }
+                    }
+                    CurrentToken::Rpc => {
+                        rpc_name = Some(token.to_string());
+
+                        input_param_name.clear();
+                        out_param_name.clear();
+
+                        current_token = CurrentToken::RpcExpectingInputParameter;
+                    }
+                    CurrentToken::RpcExpectingInputParameter => {
+                        if token == "(" {
+                            continue;
+                        }
+
+                        if token == ")" {
+                            current_token = CurrentToken::RpcExpectingOutputParameter;
+                            continue;
+                        }
+
+                        if input_param_name.len() > 0 {
+                            input_param_name.push(' ');
+                        }
+                        input_param_name.push_str(token);
+                    }
+
+                    CurrentToken::RpcExpectingOutputParameter => {
+                        if token == "returns" {
+                            continue;
+                        }
+
+                        if token == "(" {
+                            continue;
+                        }
+
+                        if token == ")" {
+                            continue;
+                        }
+
+                        if token == ";" {
+                            if rpc_name.is_none() {
+                                panic!("Somehow rpc_name is null");
+                            }
+
+                            let name = rpc_name.as_ref().unwrap();
+
+                            if name != "Ping" {
+                                rpc.push(ProtoRpc {
+                                    name: name.to_string(),
+                                    input_param: extract_param(input_param_name.as_str()),
+                                    output_param: extract_param(out_param_name.as_str()),
+                                });
+                            }
+                            current_token = CurrentToken::None;
+                        }
+
+                        if out_param_name.len() > 0 {
+                            out_param_name.push(' ');
+                        }
+                        out_param_name.push_str(token);
+                    }
+                    CurrentToken::Service => {
+                        service_name = Some(format!("{}Client", token));
+                        current_token = CurrentToken::None;
+                    }
+                }
+            }
+        }
+
+        if service_name.is_none() {
+            panic!("Can not find service name in proto file: {}", file_name);
+        }
+
+        Self {
+            service_name: service_name.unwrap().to_string(),
+            rpc,
+        }
+    }
+}
+
+pub enum CurrentToken {
+    None,
+    Service,
+    Rpc,
+    RpcExpectingInputParameter,
+    RpcExpectingOutputParameter,
 }
 
 fn into_snake_case(src: &str) -> String {

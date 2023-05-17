@@ -4,6 +4,8 @@ use proc_macro::TokenStream;
 
 use types_reader::attribute_params::AttributeParams;
 
+use super::proto_file_reader::ProtoServiceDescription;
+
 
 
 pub fn generate(
@@ -25,7 +27,7 @@ pub fn generate(
     let proto_file = attributes.get_named_param("proto_file")?;
     let proto_file: String = proto_file.get_value(None)?;
 
-    let proto_file = super::proto_file_reader::read_proto_file(proto_file);
+    let proto_file = ProtoServiceDescription::read_proto_file(proto_file);
 
     let grpc_service_name = &proto_file.service_name;
     let grpc_service_name_token = proto_file.get_service_name_as_token();
