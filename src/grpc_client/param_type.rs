@@ -13,7 +13,6 @@ impl<'s> ParamType<'s> {
         let mut name = None;
 
         for param in src.split_ascii_whitespace() {
-            println!("param: {}", param);
             if param == "stream" {
                 is_vec = true;
             } else {
