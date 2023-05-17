@@ -84,37 +84,43 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
                     }
                 }
                 CurrentToken::Rpc => {
-                    let (rpc_name_value, input_param_value) =
-                        extract_input_param_from_rpc_name(token);
-                    rpc_name = Some(rpc_name_value.to_string());
+                    rpc_name = Some(token.to_string());
 
                     input_param_name.clear();
                     out_param_name.clear();
 
-                    if let Some(input_param) = input_param_value {
-                        input_param_name.push_str(input_param);
-                    }
-
                     current_token = CurrentToken::RpcExpectingInputParameter;
                 }
                 CurrentToken::RpcExpectingInputParameter => {
-                    if token == "returns" {
-                        current_token = CurrentToken::RpcExpectingOutputParameter;
-                    } else {
-                        input_param_name.push(' ');
-                        input_param_name.push_str(token);
+                    if token == "(" {
+                        continue;
                     }
+
+                    if token == ")" {
+                        current_token = CurrentToken::RpcExpectingOutputParameter;
+                        continue;
+                    }
+
+                    if input_param_name.len() > 0 {
+                        input_param_name.push(' ');
+                    }
+                    input_param_name.push_str(token);
                 }
 
                 CurrentToken::RpcExpectingOutputParameter => {
-                    let the_end = token.ends_with(";");
-                    if the_end {
-                        out_param_name.push_str(&token[..token.len() - 1]);
-                    } else {
-                        out_param_name.push_str(&token);
+                    if token == "returns" {
+                        continue;
                     }
 
-                    if the_end {
+                    if token == "(" {
+                        continue;
+                    }
+
+                    if token == ")" {
+                        continue;
+                    }
+
+                    if token == ";" {
                         let name = rpc_name.as_ref().unwrap();
 
                         if name != "Ping" {
@@ -126,6 +132,11 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
                         }
                         current_token = CurrentToken::None;
                     }
+
+                    if out_param_name.len() > 0 {
+                        out_param_name.push(' ');
+                    }
+                    out_param_name.push_str(token);
                 }
                 CurrentToken::Service => {
                     service_name = Some(format!("{}Client", token));
@@ -143,18 +154,6 @@ pub fn read_proto_file(file_name: String) -> ProtoFile {
         service_name: service_name.unwrap().to_string(),
         rpc,
     }
-}
-
-fn extract_input_param_from_rpc_name<'s>(token: &'s str) -> (&'s str, Option<&'s str>) {
-    let index = token.find("(");
-
-    if index.is_none() {
-        return (token, None);
-    }
-
-    let index = index.unwrap();
-
-    (&token[..index], (&token[index..]).into())
 }
 
 fn extract_param(token: &str) -> String {
@@ -207,21 +206,5 @@ mod tests {
     #[test]
     fn test_into_camel_case() {
         assert_eq!(super::into_snake_case("HelloWorld"), "hello_world");
-    }
-
-    #[test]
-    fn extract_input_param_from_rpc_name_with_param_name() {
-        let result = super::extract_input_param_from_rpc_name("test(MyParam)");
-
-        assert_eq!(result.0, "test");
-        assert_eq!(result.1.unwrap(), "MyParam");
-    }
-
-    #[test]
-    fn extract_input_param_from_rpc_name_with_no_param_name() {
-        let result = super::extract_input_param_from_rpc_name("test");
-
-        assert_eq!(result.0, "test");
-        assert!(result.1.is_none());
     }
 }
