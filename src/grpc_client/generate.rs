@@ -34,7 +34,8 @@ pub fn generate(
 
     let interfaces = super::generate_interfaces_implementations(struct_name, &proto_file);
 
-    let grpc_methods = super::generate_grpc_methods(&proto_file);
+    let retries = attributes.get_named_param("retries")?;
+    let grpc_methods = super::generate_grpc_methods(&proto_file, retries.get_value(None)?);
 
     Ok(quote::quote! {
 

@@ -4,6 +4,7 @@ use super::{proto_file_reader::ProtoServiceDescription, ParamType};
 
 pub fn generate_grpc_methods(
     proto_file: &ProtoServiceDescription,
+    retries_amount: usize,
 ) -> Vec<proc_macro2::TokenStream> {
     let mut result = Vec::new();
 
@@ -21,6 +22,13 @@ pub fn generate_grpc_methods(
         let request_fn_name = get_request_fn_name(input_param.as_ref());
         let response_fn_name = get_response_fn_name(output_param.as_ref());
 
+        let with_retries = if retries_amount > 0 {
+            let amount = proc_macro2::Literal::usize_unsuffixed(retries_amount);
+            quote::quote!(.with_retries(#amount))
+        } else {
+            quote::quote!()
+        };
+
         let item = quote::quote! {
             pub async fn #fn_name(
                 &self,
@@ -31,7 +39,7 @@ pub fn generate_grpc_methods(
 
                 let result = channel
                     .#request_fn_name(input_data)
-                    .with_retries(3)
+                    #with_retries
                     .#response_fn_name;
 
                 Ok(result)
