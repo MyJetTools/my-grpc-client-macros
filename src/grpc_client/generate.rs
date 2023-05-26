@@ -18,10 +18,9 @@ pub fn generate(
 
     let attr_input: proc_macro2::TokenStream = attr.into();
 
-    let attr_as_str = attr_input.to_string();
-    println!("attr_as_str: {}", attr_as_str);
+    let mut attr_as_str = attr_input.to_string();
     
-    let attributes = ComplexAttrParams::new(attr_as_str.as_str());
+    let attributes = ComplexAttrParams::new(&mut attr_as_str);
 
     let timeout_sec = attributes.get_named_param("timeout_sec").unwrap();
     let timeout_sec = timeout_sec.as_str();
