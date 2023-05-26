@@ -13,7 +13,7 @@ pub const GRPC_SERVICE_NAME: &str = "keyvalue";
     ]
 )]
 pub struct KeyValueGrpcClient {
-    channel: GrpcChannel<TGrpcService>,
+    channel: my_grpc_extensions::GrpcChannel<TGrpcService>,
 }
 
 ```
