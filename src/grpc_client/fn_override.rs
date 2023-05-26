@@ -26,7 +26,7 @@ impl FnOverride {
             result.insert(
                 name,
                 FnOverride {
-                    retries: item.get_named_param("timeout_sec")?.get_number_value()? as usize,
+                    retries: item.get_named_param("retries")?.get_number_value()? as usize,
                 },
             );
         }
