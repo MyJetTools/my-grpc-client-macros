@@ -61,7 +61,7 @@ pub fn generate(
     Ok(quote::quote! {
 
         pub const SERVICE_NAME: &str = #grpc_service_name;
-        type TGrpcService = #grpc_service_name_token<InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
+        type TGrpcService = #grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
 
         struct MyGrpcServiceFactory;
 
