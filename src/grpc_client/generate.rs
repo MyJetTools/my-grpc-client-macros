@@ -60,6 +60,7 @@ pub fn generate(
 
     Ok(quote::quote! {
 
+
         type TGrpcService = #grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
 
         struct MyGrpcServiceFactory;
@@ -73,7 +74,7 @@ pub fn generate(
             )
         }
 
-        fn get_service_name() -> &'static str {
+        fn get_service_name(&self) -> &'static str {
             #grpc_service_name
         }
 
@@ -93,6 +94,10 @@ pub fn generate(
                     Duration::from_secs(#timeout_sec),
                 ),
             }
+        }
+
+        fn get_service_name() -> &'static str {
+            #grpc_service_name
         }
 
         #(#grpc_methods)*  
