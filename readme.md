@@ -17,3 +17,22 @@ pub struct KeyValueGrpcClient {
 }
 
 ```
+
+As Well use generated code to read settings:
+
+
+```rust
+#[async_trait::async_trait]
+impl my_grpc_extensions::GrpcClientSettings for SettingsReader {
+    async fn get_grpc_url(&self, name: &'static str) -> String {
+        if name == KeyValueGrpcClient::get_service_name() {
+            let read_access = self.settings.read().await;
+            return read_access.key_value_grpc_url.clone();
+        }
+
+        panic!("Unknown grpc service name: {}", name)
+    }
+}
+
+
+```
