@@ -1,10 +1,12 @@
 
 
+use std::str::FromStr;
+
 use proc_macro::TokenStream;
 
 use types_reader::{ ParamsListAsTokens};
 
-use crate::grpc_client::fn_override::FnOverride;
+use crate::grpc_client::{fn_override::FnOverride, proto_file_reader::into_snake_case};
 
 use super::proto_file_reader::ProtoServiceDescription;
 
@@ -44,6 +46,16 @@ pub fn generate(
     let overrides = FnOverride::new(&attributes)?;
 
 
+    let crate_ns = attributes.get_named_param("crate_ns")?.get_str_value_token()?;
+    let mut use_name_spaces = Vec::new();
+    use_name_spaces.push(quote::quote! {#crate_ns::*});
+
+    let ns_of_client = format!("{}_client", into_snake_case(&grpc_service_name));
+    let ns_of_client = proc_macro2::TokenStream::from_str(ns_of_client.as_str()).unwrap();
+    use_name_spaces.push(quote::quote! {#crate_ns::#ns_of_client::*});
+    
+
+
     for (override_fn_name, fn_override) in &overrides{
         if !proto_file.has_method(override_fn_name){
             return Err(syn::Error::new_spanned(
@@ -59,7 +71,7 @@ pub fn generate(
     
 
     Ok(quote::quote! {
-
+        #(*use_name_spaces);
 
         type TGrpcService = #grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
 

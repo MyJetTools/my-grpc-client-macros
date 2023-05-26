@@ -170,7 +170,7 @@ pub enum CurrentToken {
     RpcExpectingOutputParameter,
 }
 
-fn into_snake_case(src: &str) -> String {
+pub fn into_snake_case(src: &str) -> String {
     let mut result = String::new();
 
     for (index, ch) in src.chars().enumerate() {
