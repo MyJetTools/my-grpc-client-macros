@@ -60,7 +60,6 @@ pub fn generate(
 
     Ok(quote::quote! {
 
-        pub const SERVICE_NAME: &str = #grpc_service_name;
         type TGrpcService = #grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
 
         struct MyGrpcServiceFactory;
@@ -75,7 +74,7 @@ pub fn generate(
         }
 
         fn get_service_name() -> &'static str {
-            SERVICE_NAME
+            #grpc_service_name
         }
 
         async fn ping(&self, mut service: TGrpcService) {
