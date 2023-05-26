@@ -46,9 +46,9 @@ pub fn generate(
 
     let crate_ns = attributes.get_named_param("crate_ns")?.get_str_value()?;
     let mut use_name_spaces = Vec::new();
-    use_name_spaces.push(proc_macro2::TokenStream::from_str(format!("{}::*", crate_ns).as_str()).unwrap());
+    use_name_spaces.push(proc_macro2::TokenStream::from_str(format!("use {}::*", crate_ns).as_str()).unwrap());
 
-    let ns_of_client = format!("{}::{}_client::{}Client", crate_ns,into_snake_case(&grpc_service_name), grpc_service_name);
+    let ns_of_client = format!("use {}::{}_client::{}Client", crate_ns,into_snake_case(&grpc_service_name), grpc_service_name);
     use_name_spaces.push(proc_macro2::TokenStream::from_str(ns_of_client.as_str()).unwrap());
     
 
