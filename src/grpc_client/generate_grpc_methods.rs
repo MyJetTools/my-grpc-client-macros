@@ -1,10 +1,11 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
-use super::{proto_file_reader::ProtoServiceDescription, ParamType};
+use super::{fn_override::FnOverride, proto_file_reader::ProtoServiceDescription, ParamType};
 
 pub fn generate_grpc_methods(
     proto_file: &ProtoServiceDescription,
     retries_amount: usize,
+    overrides: &HashMap<String, FnOverride>,
 ) -> Vec<proc_macro2::TokenStream> {
     let mut result = Vec::new();
 
@@ -21,6 +22,12 @@ pub fn generate_grpc_methods(
 
         let request_fn_name = get_request_fn_name(input_param.as_ref());
         let response_fn_name = get_response_fn_name(output_param.as_ref());
+
+        let retries_amount = if let Some(value) = overrides.get(&rpc.name) {
+            value.retries
+        } else {
+            retries_amount
+        };
 
         let with_retries = if retries_amount > 0 {
             let amount = proc_macro2::Literal::usize_unsuffixed(retries_amount);

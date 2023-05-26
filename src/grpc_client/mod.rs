@@ -1,3 +1,4 @@
+mod fn_override;
 mod generate;
 mod generate_grpc_methods;
 mod param_type;

@@ -1,7 +1,10 @@
 
+
 use proc_macro::TokenStream;
 
-use types_reader::{ ParamContent, ParamsListAsTokens};
+use types_reader::{ ParamsListAsTokens};
+
+use crate::grpc_client::fn_override::FnOverride;
 
 use super::proto_file_reader::ProtoServiceDescription;
 
@@ -36,7 +39,15 @@ pub fn generate(
 
     let retries = attributes.get_named_param("retries")?;
     let retries = retries.get_number_value()?;
-    let grpc_methods = super::generate_grpc_methods(&proto_file, retries as usize);
+
+
+    let overrides = FnOverride::new(&attributes)?;
+    
+    let grpc_methods = super::generate_grpc_methods(&proto_file, retries as usize, &overrides);
+
+
+    
+    
 
     Ok(quote::quote! {
 
@@ -83,4 +94,6 @@ pub fn generate(
     }
     .into())
 }
+
+
 
