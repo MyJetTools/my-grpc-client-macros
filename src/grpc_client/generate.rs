@@ -47,7 +47,7 @@ pub fn generate(
     for (override_fn_name, fn_override) in &overrides{
         if !proto_file.has_method(override_fn_name){
             return Err(syn::Error::new_spanned(
-                &ast,
+                fn_override.token_stream.clone(),
                 format!("Method {} is not found in proto file for service {}", override_fn_name, grpc_service_name),
             ));
         }
