@@ -42,9 +42,18 @@ pub fn generate(
 
 
     let overrides = FnOverride::new(&attributes)?;
+
+
+    for (override_fn_name, fn_override) in &overrides{
+        if !proto_file.has_method(override_fn_name){
+            return Err(syn::Error::new_spanned(
+                &ast,
+                format!("Method {} is not found in proto file for service {}", override_fn_name, grpc_service_name),
+            ));
+        }
+    }
     
     let grpc_methods = super::generate_grpc_methods(&proto_file, retries as usize, &overrides);
-
 
     
     

@@ -37,6 +37,16 @@ impl ProtoServiceDescription {
         proc_macro2::TokenStream::from_str(&self.service_name).unwrap()
     }
 
+    pub fn has_method(&self, method_name: &str) -> bool {
+        for rpc in &self.rpc {
+            if rpc.name == method_name {
+                return true;
+            }
+        }
+
+        false
+    }
+
     pub fn read_proto_file(file_name: &str) -> Self {
         let file = std::fs::File::open(file_name);
 

@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 
+use proc_macro2::TokenStream;
 use types_reader::ParamsListAsTokens;
 
 pub struct FnOverride {
     pub retries: usize,
+    pub token_stream: TokenStream,
 }
 
 impl FnOverride {
@@ -27,6 +29,7 @@ impl FnOverride {
                 name,
                 FnOverride {
                     retries: item.get_named_param("retries")?.get_number_value()? as usize,
+                    token_stream: item.get_token_stream(),
                 },
             );
         }
