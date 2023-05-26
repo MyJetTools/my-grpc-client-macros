@@ -13,8 +13,8 @@ pub fn generate(
     input: TokenStream,
 ) -> Result<proc_macro::TokenStream, syn::Error> {
 
-    println!("{:?}", attr);
-    
+    println!("{:#?}", attr);
+
     let ast: syn::DeriveInput = syn::parse(input).unwrap();
 
     let struct_name = &ast.ident;
