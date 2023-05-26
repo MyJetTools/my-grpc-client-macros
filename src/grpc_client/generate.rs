@@ -44,13 +44,12 @@ pub fn generate(
     let overrides = FnOverride::new(&attributes)?;
 
 
-    let crate_ns = attributes.get_named_param("crate_ns")?.get_str_value_token()?;
+    let crate_ns = attributes.get_named_param("crate_ns")?.get_str_value()?;
     let mut use_name_spaces = Vec::new();
-    use_name_spaces.push(quote::quote! {#crate_ns::*});
+    use_name_spaces.push(proc_macro2::TokenStream::from_str(format!("{}::*", crate_ns).as_str()).unwrap());
 
-    let ns_of_client = format!("{}_client", into_snake_case(&grpc_service_name));
-    let ns_of_client = proc_macro2::TokenStream::from_str(ns_of_client.as_str()).unwrap();
-    use_name_spaces.push(quote::quote! {#crate_ns::#ns_of_client::*});
+    let ns_of_client = format!("crate_ns::{}_client::{}Client", into_snake_case(&grpc_service_name), grpc_service_name);
+    use_name_spaces.push(proc_macro2::TokenStream::from_str(ns_of_client.as_str()).unwrap());
     
 
 
@@ -70,8 +69,8 @@ pub fn generate(
 
     Ok(quote::quote! {
 
-        #(#use_name_spaces)* 
-        
+        #(#use_name_spaces)*;
+
         type TGrpcService = #grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
 
         struct MyGrpcServiceFactory;
