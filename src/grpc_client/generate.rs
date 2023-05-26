@@ -75,7 +75,7 @@ pub fn generate(
         }
 
         fn get_service_name(&self) -> &'static str {
-            #grpc_service_name
+            #struct_name::get_service_name()
         }
 
         async fn ping(&self, mut service: TGrpcService) {
@@ -96,7 +96,7 @@ pub fn generate(
             }
         }
 
-        fn get_service_name() -> &'static str {
+        pub fn get_service_name() -> &'static str {
             #grpc_service_name
         }
 
