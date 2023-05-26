@@ -67,7 +67,7 @@ pub fn generate(
 
         #[async_trait::async_trait]
         impl my_grpc_extensions::GrpcServiceFactory<TGrpcService> for MyGrpcServiceFactory {
-        fn create_service(&self, channel: Channel, ctx: &my_telemetry::MyTelemetryContext) -> TGrpcService {
+        fn create_service(&self, channel: tonic::transport::Channel, ctx: &my_telemetry::MyTelemetryContext) -> TGrpcService {
             #grpc_service_name_token::with_interceptor(
               channel,
               my_grpc_extensions::GrpcClientInterceptor::new(ctx.clone()),
