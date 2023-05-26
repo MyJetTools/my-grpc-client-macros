@@ -69,8 +69,9 @@ pub fn generate(
     
 
     Ok(quote::quote! {
-        #(*use_name_spaces);
 
+        #(#use_name_spaces)* 
+        
         type TGrpcService = #grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
 
         struct MyGrpcServiceFactory;
