@@ -2,10 +2,11 @@ The most general Use case of auto generating the GRPC Client with Retries is her
 
 ```rust
 
-pub const GRPC_SERVICE_NAME: &str = "keyvalue";
+use my_grpc_client_macros::generate_grpc_client;
 
 #[generate_grpc_client(
     proto_file: "./proto/KeyValueFlows.proto",
+    crate_ns: "crate::keyvalue_grpc",
     timeout_sec: 5,
     retries: 3,
     overrides: [
@@ -15,6 +16,7 @@ pub const GRPC_SERVICE_NAME: &str = "keyvalue";
 pub struct KeyValueGrpcClient {
     channel: my_grpc_extensions::GrpcChannel<TGrpcService>,
 }
+
 
 ```
 
