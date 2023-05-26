@@ -48,7 +48,7 @@ pub fn generate(
     let mut use_name_spaces = Vec::new();
     use_name_spaces.push(proc_macro2::TokenStream::from_str(format!("{}::*", crate_ns).as_str()).unwrap());
 
-    let ns_of_client = format!("crate_ns::{}_client::{}Client", into_snake_case(&grpc_service_name), grpc_service_name);
+    let ns_of_client = format!("{}::{}_client::{}Client", crate_ns,into_snake_case(&grpc_service_name), grpc_service_name);
     use_name_spaces.push(proc_macro2::TokenStream::from_str(ns_of_client.as_str()).unwrap());
     
 
@@ -69,7 +69,7 @@ pub fn generate(
 
     Ok(quote::quote! {
 
-        #(#use_name_spaces)*;
+        #(#use_name_spaces;)*
 
         type TGrpcService = #grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
 
