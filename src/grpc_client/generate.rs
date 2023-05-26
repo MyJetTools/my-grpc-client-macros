@@ -91,7 +91,7 @@ pub fn generate(
                 channel: my_grpc_extensions::GrpcChannel::new(
                     get_grpc_address,
                     std::sync::Arc::new(MyGrpcServiceFactory),
-                    Duration::from_secs(#timeout_sec),
+                    std::time::Duration::from_secs(#timeout_sec),
                 ),
             }
         }
