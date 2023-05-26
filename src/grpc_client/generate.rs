@@ -74,7 +74,7 @@ pub fn generate(
             )
         }
 
-        fn get_service_name(&self) -> &'static str {
+        fn get_service_name() -> &'static str {
             SERVICE_NAME
         }
 
