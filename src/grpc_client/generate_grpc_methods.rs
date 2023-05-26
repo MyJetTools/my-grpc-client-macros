@@ -40,7 +40,7 @@ pub fn generate_grpc_methods(
             pub async fn #fn_name(
                 &self,
                 input_data: #input_data_type,
-                ctx: &MyTelemetryContext,
+                ctx: &my_telemetry::MyTelemetryContext,
             ) -> Result<#output_data_type, my_grpc_extensions::GrpcReadError> {
                 let channel = self.channel.get_channel(ctx).await.unwrap();
 
