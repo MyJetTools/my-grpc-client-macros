@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use proc_macro::TokenStream;
 
-use types_reader::attribute_params::AttributeParams;
+use types_reader::{ComplexAttrParams};
 
 use super::proto_file_reader::ProtoServiceDescription;
 
@@ -18,14 +18,15 @@ pub fn generate(
 
     let attr_input: proc_macro2::TokenStream = attr.into();
 
-    let attributes = AttributeParams::from_token_string(attr_input)?;
+    let attr_as_str = attr_input.to_string();
+    let attributes = ComplexAttrParams::new(attr_as_str.as_str());
 
-    let timeout_sec = attributes.get_named_param("timeout_sec")?;
-    let timeout_sec: String = timeout_sec.get_value(None)?;
-    let timeout_sec = proc_macro2::TokenStream::from_str(timeout_sec.as_str()).unwrap();
+    let timeout_sec = attributes.get_named_param("timeout_sec").unwrap();
+    let timeout_sec = timeout_sec.as_str();
+    let timeout_sec = proc_macro2::TokenStream::from_str(timeout_sec).unwrap();
 
-    let proto_file = attributes.get_named_param("proto_file")?;
-    let proto_file: String = proto_file.get_value(None)?;
+    let proto_file = attributes.get_named_param("proto_file").unwrap();
+    let proto_file = proto_file.as_str();
 
     let proto_file = ProtoServiceDescription::read_proto_file(proto_file);
 
@@ -34,8 +35,8 @@ pub fn generate(
 
     let interfaces = super::generate_interfaces_implementations(struct_name, &proto_file);
 
-    let retries = attributes.get_named_param("retries")?;
-    let grpc_methods = super::generate_grpc_methods(&proto_file, retries.get_value(None)?);
+    let retries = attributes.get_named_param("retries").unwrap();
+    let grpc_methods = super::generate_grpc_methods(&proto_file, retries.get_value(None).unwrap());
 
     Ok(quote::quote! {
 

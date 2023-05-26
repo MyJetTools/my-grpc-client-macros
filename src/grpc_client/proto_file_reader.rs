@@ -37,8 +37,8 @@ impl ProtoServiceDescription {
         proc_macro2::TokenStream::from_str(&self.service_name).unwrap()
     }
 
-    pub fn read_proto_file(file_name: String) -> Self {
-        let file = std::fs::File::open(file_name.as_str());
+    pub fn read_proto_file(file_name: &str) -> Self {
+        let file = std::fs::File::open(file_name);
 
         if let Err(err) = file {
             panic!("Can not open file: {}. Error: {:?}", file_name, err);
