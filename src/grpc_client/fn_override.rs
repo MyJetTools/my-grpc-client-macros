@@ -16,7 +16,9 @@ impl FnOverride {
             return Ok(HashMap::new());
         }
 
-        let overrides = overrides.unwrap().unwrap_as_object_list()?;
+        let tokens_list = overrides.unwrap();
+
+        let overrides = tokens_list.unwrap_as_object_list()?;
 
         let mut result = HashMap::new();
 
@@ -32,6 +34,10 @@ impl FnOverride {
                     token_stream: item.get_token_stream(),
                 },
             );
+        }
+
+        if result.len() == 0 {
+            return Err(tokens_list.throw_error("Overrides list can not be empty. Just remove field if you do not want to override any function"));
         }
 
         Ok(result)
