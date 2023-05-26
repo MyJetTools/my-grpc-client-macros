@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use proc_macro::TokenStream;
 
-use types_reader::{ComplexAttrParams};
+use types_reader::{ComplexAttrParams, ParamContent};
 
 use super::proto_file_reader::ProtoServiceDescription;
 
@@ -22,13 +22,14 @@ pub fn generate(
     
     let attributes = ComplexAttrParams::new(&mut attr_as_str);
 
-    let timeout_sec = attributes.get_named_param("timeout_sec").unwrap();
+    let timeout_sec = attributes.get_named_param("timeout_sec");
+    let timeout_sec = into_err(timeout_sec, &attr_input)?;
     let timeout_sec = timeout_sec.as_str();
     let timeout_sec = proc_macro2::TokenStream::from_str(timeout_sec).unwrap();
 
-    let proto_file = attributes.get_named_param("proto_file").unwrap();
+    let proto_file = attributes.get_named_param("proto_file");
+    let proto_file = into_err(proto_file, &attr_input)?;
     let proto_file = proto_file.as_str();
-
     let proto_file = ProtoServiceDescription::read_proto_file(proto_file);
 
     let grpc_service_name = &proto_file.service_name;
@@ -83,4 +84,12 @@ pub fn generate(
       #(#interfaces)*  
     }
     .into())
+}
+
+
+fn into_err<'s>(src: Result<ParamContent<'s>, String>, token:&proc_macro2::TokenStream)->Result<ParamContent<'s>, syn::Error>{
+    match src {
+        Ok(value) => Ok(value),
+        Err(err) => Err(syn::Error::new_spanned(token.clone(), err)),
+    }
 }
