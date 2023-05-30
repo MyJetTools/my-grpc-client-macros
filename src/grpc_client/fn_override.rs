@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use proc_macro2::TokenStream;
-use types_reader::ParamsListAsTokens;
+use types_reader::ParamsList;
 
 pub struct FnOverride {
     pub retries: usize,
@@ -9,7 +9,7 @@ pub struct FnOverride {
 }
 
 impl FnOverride {
-    pub fn new(attributes: &ParamsListAsTokens) -> Result<HashMap<String, Self>, syn::Error> {
+    pub fn new(attributes: &ParamsList) -> Result<HashMap<String, Self>, syn::Error> {
         let overrides = attributes.try_get_named_param("overrides");
 
         if overrides.is_none() {
@@ -25,12 +25,15 @@ impl FnOverride {
         for item in overrides.iter() {
             let name = item
                 .get_named_param("fn_name")?
-                .get_str_value()?
+                .unwrap_as_string_value()?
                 .to_string();
             result.insert(
                 name,
                 FnOverride {
-                    retries: item.get_named_param("retries")?.get_number_value()? as usize,
+                    retries: item
+                        .get_named_param("retries")?
+                        .unwrap_as_number_value()?
+                        .as_usize(),
                     token_stream: item.get_token_stream(),
                 },
             );

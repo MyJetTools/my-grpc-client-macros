@@ -3,8 +3,8 @@
 use std::str::FromStr;
 
 use proc_macro::TokenStream;
+use types_reader::ParamsList;
 
-use types_reader::{ ParamsListAsTokens};
 
 use crate::grpc_client::{fn_override::FnOverride, proto_file_reader::into_snake_case};
 
@@ -22,14 +22,14 @@ pub fn generate(
     let attr_input: proc_macro2::TokenStream = attr.into();
 
     
-    let attributes = ParamsListAsTokens::new(attr_input)?;
+    let attributes = ParamsList::new(attr_input)?;
 
     let timeout_sec = attributes.get_named_param("timeout_sec")?;
-    let timeout_sec = timeout_sec.get_number_value_token()?;
+    let timeout_sec = timeout_sec.unwrap_as_number_value()?.as_literal();
 
 
     let proto_file = attributes.get_named_param("proto_file")?;
-    let proto_file = proto_file.get_str_value()?;
+    let proto_file = proto_file.unwrap_as_single_value()?.as_str();
     let proto_file = ProtoServiceDescription::read_proto_file(proto_file);
 
     let grpc_service_name = &proto_file.service_name;
@@ -38,13 +38,13 @@ pub fn generate(
     let interfaces = super::generate_interfaces_implementations(struct_name, &proto_file);
 
     let retries = attributes.get_named_param("retries")?;
-    let retries = retries.get_number_value()?;
+    let retries = retries.unwrap_as_number_value()?.as_usize();
 
 
     let overrides = FnOverride::new(&attributes)?;
 
 
-    let crate_ns = attributes.get_named_param("crate_ns")?.get_str_value()?;
+    let crate_ns = attributes.get_named_param("crate_ns")?.unwrap_as_string_value()?.as_str();
     let mut use_name_spaces = Vec::new();
     use_name_spaces.push(proc_macro2::TokenStream::from_str(format!("use {}::*", crate_ns).as_str()).unwrap());
 
@@ -62,7 +62,7 @@ pub fn generate(
         }
     }
     
-    let grpc_methods = super::generate_grpc_methods(&proto_file, retries as usize, &overrides);
+    let grpc_methods = super::generate_grpc_methods(&proto_file, retries, &overrides);
 
     
     
