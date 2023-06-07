@@ -29,7 +29,7 @@ pub fn generate(
 
 
     let proto_file = attributes.get_named_param("proto_file")?;
-    let proto_file = proto_file.unwrap_as_single_value()?.as_str();
+    let proto_file = proto_file.unwrap_as_string_value()?.as_str();
     let proto_file = ProtoServiceDescription::read_proto_file(proto_file);
 
     let grpc_service_name = &proto_file.service_name;
