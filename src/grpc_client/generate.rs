@@ -24,9 +24,17 @@ pub fn generate(
     
     let attributes = ParamsList::new(attr_input)?;
 
-    let timeout_sec = attributes.get_named_param("timeout_sec")?;
+    let timeout_sec = attributes.get_named_param("request_timeout_sec")?;
     let timeout_sec = timeout_sec.unwrap_as_number_value()?.as_literal();
 
+
+    let ping_timeout_sec = attributes.get_named_param("ping_timeout_sec")?;
+    let ping_timeout_sec = ping_timeout_sec.unwrap_as_number_value()?.as_literal();
+
+
+
+    let ping_interval_sec = attributes.get_named_param("ping_interval_sec")?;
+    let ping_interval_sec = ping_interval_sec.unwrap_as_number_value()?.as_literal();
 
     let proto_file = attributes.get_named_param("proto_file")?;
     let proto_file = proto_file.unwrap_as_string_value()?.as_str();
@@ -102,6 +110,8 @@ pub fn generate(
                     get_grpc_address,
                     std::sync::Arc::new(MyGrpcServiceFactory),
                     std::time::Duration::from_secs(#timeout_sec),
+                    std::time::Duration::from_secs(#ping_timeout_sec),
+                    std::time::Duration::from_secs(#ping_interval_sec),
                 ),
             }
         }
