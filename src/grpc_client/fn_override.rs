@@ -3,13 +3,13 @@ use std::collections::HashMap;
 use proc_macro2::TokenStream;
 use types_reader::ParamsList;
 
-pub struct FnOverride {
+pub struct FnOverride<'s> {
     pub retries: usize,
-    pub token_stream: TokenStream,
+    pub token_stream: &'s TokenStream,
 }
 
-impl FnOverride {
-    pub fn new(attributes: &ParamsList) -> Result<HashMap<String, Self>, syn::Error> {
+impl<'s> FnOverride<'s> {
+    pub fn new(attributes: &'s ParamsList) -> Result<HashMap<String, Self>, syn::Error> {
         let overrides = attributes.try_get_named_param("overrides");
 
         if overrides.is_none() {
