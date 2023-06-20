@@ -41,6 +41,12 @@ pub struct KeyValueGrpcClient {
 
 Ping loop happens in a background to detect channel disconnects and reconnect them in the background.
 
+Ping method is required in proto file
+```proto
+    rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+```
+
 ### Settings setup
 ```rust
 #[async_trait::async_trait]
