@@ -41,7 +41,7 @@ pub struct KeyValueGrpcClient {
 
 Ping loop happens in a background to detect channel disconnects and reconnect them in the background.
 
-Ping method is required in proto file
+Ping method is required in proto file withing the service
 ```proto
     rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
 
