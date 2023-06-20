@@ -47,6 +47,16 @@ Ping method is required in proto file withing the service
 
 ```
 
+When we implement the server part ping method usually looks like
+
+```rust
+    async fn ping(&self, _: tonic::Request<()>) -> Result<tonic::Response<()>, tonic::Status> {
+        Ok(tonic::Response::new(()))
+    }
+```
+
+
+
 ### Settings setup
 ```rust
 #[async_trait::async_trait]
