@@ -1,7 +1,7 @@
 client generator depends on my-grpc-extensions version 0.4.0 or higher
 
 ```toml
-my-grpc-extensions = { tag = "0.4.0", git = "https://github.com/MyJetTools/my-grpc-extensions.git" }
+my-grpc-extensions = { tag = "x.x.x", git = "https://github.com/MyJetTools/my-grpc-extensions.git" }
 ```
 
 The most general Use case of auto generating the GRPC Client with Retries is here:
