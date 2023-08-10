@@ -1,3 +1,9 @@
+client generator depends on my-grpc-extensions version 0.4.0 or higher
+
+```toml
+my-grpc-extensions = { tag = "x.x.x", git = "https://github.com/MyJetTools/my-grpc-extensions.git" }
+```
+
 The most general Use case of auto generating the GRPC Client with Retries is here:
 
 ```rust
@@ -34,6 +40,22 @@ pub struct KeyValueGrpcClient {
 ### PING Loop
 
 Ping loop happens in a background to detect channel disconnects and reconnect them in the background.
+
+Ping method is required in proto file withing the service
+```proto
+    rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+```
+
+When we implement the server part ping method usually looks like
+
+```rust
+    async fn ping(&self, _: tonic::Request<()>) -> Result<tonic::Response<()>, tonic::Status> {
+        Ok(tonic::Response::new(()))
+    }
+```
+
+
 
 ### Settings setup
 ```rust
