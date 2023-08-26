@@ -22,7 +22,7 @@ pub fn generate(
     let attr_input: proc_macro2::TokenStream = attr.into();
 
     
-    let attributes = ParamsList::new(attr_input)?;
+    let attributes = ParamsList::new(attr_input, ||None)?;
 
     let timeout_sec = attributes.get_named_param("request_timeout_sec")?;
     let timeout_sec = timeout_sec.unwrap_as_number_value()?.as_literal();
