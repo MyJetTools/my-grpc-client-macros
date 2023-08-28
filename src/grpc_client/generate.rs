@@ -32,7 +32,6 @@ pub fn generate(
     let ping_timeout_sec = ping_timeout_sec.unwrap_as_number_value()?.as_literal();
 
 
-
     let ping_interval_sec = attributes.get_named_param("ping_interval_sec")?;
     let ping_interval_sec = ping_interval_sec.unwrap_as_number_value()?.as_literal();
 
@@ -58,6 +57,13 @@ pub fn generate(
 
     let ns_of_client = format!("use {}::{}::{}", crate_ns,into_snake_case(&grpc_service_name), grpc_service_name);
     use_name_spaces.push(proc_macro2::TokenStream::from_str(ns_of_client.as_str()).unwrap());
+
+
+    let settings_service_name = if let Some(service_name) =  attributes.try_get_named_param("service_name"){
+        service_name.unwrap_as_string_value()?.as_str().to_string()
+    }else{
+        grpc_service_name.to_string()
+    };
     
 
 
@@ -117,7 +123,7 @@ pub fn generate(
         }
 
         pub fn get_service_name() -> &'static str {
-            #grpc_service_name
+            #settings_service_name
         }
 
         #(#grpc_methods)*  
