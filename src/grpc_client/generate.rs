@@ -19,6 +19,8 @@ pub fn generate(
 
     let struct_name = &ast.ident;
 
+
+
     let attr_input: proc_macro2::TokenStream = attr.into();
 
     
@@ -61,8 +63,9 @@ pub fn generate(
 
     let settings_service_name = if let Some(service_name) =  attributes.try_get_named_param("service_name"){
         service_name.unwrap_as_string_value()?.as_str().to_string()
+        
     }else{
-        grpc_service_name.to_string()
+        struct_name.to_string()
     };
     
 
@@ -77,9 +80,6 @@ pub fn generate(
     }
     
     let grpc_methods = super::generate_grpc_methods(&proto_file, retries, &overrides);
-
-    
-    
 
     Ok(quote::quote! {
 
