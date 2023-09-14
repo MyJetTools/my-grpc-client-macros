@@ -100,11 +100,17 @@ pub fn generate(
         }
     };
 
+    let t_grpc_service = if with_telemetry{
+        quote::quote!(#grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;)
+    }else{
+        quote::quote!(#grpc_service_name_token<tonic::transport::Channel>;)
+    };
+
     Ok(quote::quote! {
 
         #(#use_name_spaces;)*
 
-        type TGrpcService = #grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;
+        type TGrpcService = #t_grpc_service;
 
         struct MyGrpcServiceFactory;
 
