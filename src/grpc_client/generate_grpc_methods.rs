@@ -6,6 +6,7 @@ pub fn generate_grpc_methods(
     proto_file: &ProtoServiceDescription,
     retries_amount: usize,
     overrides: &HashMap<String, FnOverride>,
+    width_telemetry: bool,
 ) -> Vec<proc_macro2::TokenStream> {
     let mut result = Vec::new();
 
@@ -36,11 +37,17 @@ pub fn generate_grpc_methods(
             quote::quote!()
         };
 
+        let ctx_param = if width_telemetry {
+            quote::quote!(ctx: &my_telemetry::MyTelemetryContext,)
+        } else {
+            quote::quote!()
+        };
+
         let item = quote::quote! {
             pub async fn #fn_name(
                 &self,
                 input_data: #input_data_type,
-                ctx: &my_telemetry::MyTelemetryContext,
+                #ctx_param
             ) -> Result<#output_data_type, my_grpc_extensions::GrpcReadError> {
                 let channel = self.channel.get_channel(ctx).await.unwrap();
 
