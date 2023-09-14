@@ -80,7 +80,7 @@ pub fn generate(
         }
     }
     
-    let grpc_methods = super::generate_grpc_methods(&proto_file, retries, &overrides, true);
+    let grpc_methods = super::generate_grpc_methods(&proto_file, retries, &overrides, with_telemetry);
 
 
     let fn_create_service = if with_telemetry{
@@ -101,9 +101,9 @@ pub fn generate(
     };
 
     let t_grpc_service = if with_telemetry{
-        quote::quote!(#grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>;)
+        quote::quote!(#grpc_service_name_token<tonic::codegen::InterceptedService<tonic::transport::Channel, my_grpc_extensions::GrpcClientInterceptor>>)
     }else{
-        quote::quote!(#grpc_service_name_token<tonic::transport::Channel>;)
+        quote::quote!(#grpc_service_name_token<tonic::transport::Channel>)
     };
 
     Ok(quote::quote! {
