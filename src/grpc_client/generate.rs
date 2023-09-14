@@ -127,7 +127,9 @@ pub fn generate(
         }
       }
 
-      #ast
+      pub struct #struct_name{
+        channel: my_grpc_extensions::GrpcChannel<TGrpcService>,
+      }
 
       impl #struct_name{
         pub fn new(get_grpc_address: std::sync::Arc<dyn my_grpc_extensions::GrpcClientSettings + Send + Sync + 'static>,) -> Self {
