@@ -43,13 +43,19 @@ pub fn generate_grpc_methods(
             quote::quote!()
         };
 
+        let get_channel = if width_telemetry {
+            quote::quote!(get_channel(ctx).await.unwrap())
+        } else {
+            quote::quote!(get_channel().await.unwrap())
+        };
+
         let item = quote::quote! {
             pub async fn #fn_name(
                 &self,
                 input_data: #input_data_type,
                 #ctx_param
             ) -> Result<#output_data_type, my_grpc_extensions::GrpcReadError> {
-                let channel = self.channel.get_channel(ctx).await.unwrap();
+                let channel = #get_channel;
 
                 let result = channel
                     .#request_fn_name(input_data)
